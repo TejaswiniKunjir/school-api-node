@@ -1,5 +1,5 @@
-import pool from '../db.js';
-import { validationResult } from 'express-validator';
+import db from "../db.js";
+import { validationResult } from "express-validator";
 
 // ---- helpers for distance ----
 const toRadians = (deg) => (deg * Math.PI) / 180;
@@ -27,34 +27,30 @@ export const addSchool = async (req, res) => {
   const { name, address, latitude, longitude } = req.body;
 
   try {
-    const sql = 'INSERT INTO schools (name, address, latitude, longitude) VALUES (?, ?, ?, ?)';
-    const [result] = await pool.execute(sql, [
-      name.trim(),
-      address.trim(),
-      Number(latitude),
-      Number(longitude),
-    ]);
+    const stmt = db.prepare(
+      "INSERT INTO schools (name, address, latitude, longitude) VALUES (?, ?, ?, ?)"
+    );
+    const result = stmt.run(name.trim(), address.trim(), Number(latitude), Number(longitude));
 
     return res.status(201).json({
       status: true,
-      message: 'School added successfully',
+      message: "School added successfully",
       data: {
-        id: result.insertId,
+        id: result.lastInsertRowid,
         name,
         address,
         latitude: Number(latitude),
-        longitude: Number(longitude),
-      },
+        longitude: Number(longitude)
+      }
     });
   } catch (err) {
-    console.error('addSchool error:', err);
-    return res.status(500).json({ status: false, message: 'Internal server error' });
+    console.error("addSchool error:", err);
+    return res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
 
 /**
  * GET /listSchools?lat=..&lng=..&limit=..
- * Compute Haversine in Node (avoids MySQL LIMIT/placeholder issues).
  */
 export const listSchools = async (req, res) => {
   const errors = validationResult(req);
@@ -64,39 +60,23 @@ export const listSchools = async (req, res) => {
 
   const userLat = Number(req.query.lat);
   const userLng = Number(req.query.lng);
-
-  // clamp & harden limit
-  const limitInt = Math.min(Math.max(parseInt(req.query.limit ?? '100', 10) || 100, 1), 1000);
-
-  if (!Number.isFinite(userLat) || !Number.isFinite(userLng)) {
-    return res.status(400).json({ status: false, message: 'lat/lng must be valid numbers' });
-  }
+  const limitInt = Math.min(Math.max(parseInt(req.query.limit ?? "100", 10) || 100, 1), 1000);
 
   try {
-    // 1) fetch rows (no SQL math)
-    const [rows] = await pool.execute(
-      'SELECT id, name, address, latitude, longitude FROM schools'
-    );
+    const rows = db.prepare("SELECT id, name, address, latitude, longitude FROM schools").all();
 
-    // 2) compute distance in Node
     const withDistance = rows.map((r) => {
-      const distance_km = haversineKm(
-        userLat,
-        userLng,
-        Number(r.latitude),
-        Number(r.longitude)
-      );
+      const distance_km = haversineKm(userLat, userLng, Number(r.latitude), Number(r.longitude));
       return {
         id: r.id,
         name: r.name,
         address: r.address,
         latitude: Number(r.latitude),
         longitude: Number(r.longitude),
-        distance_km: Number.isFinite(distance_km) ? distance_km : null,
+        distance_km: Number.isFinite(distance_km) ? distance_km : null
       };
     });
 
-    // 3) sort & limit
     withDistance.sort((a, b) => {
       if (a.distance_km == null) return 1;
       if (b.distance_km == null) return -1;
@@ -104,10 +84,9 @@ export const listSchools = async (req, res) => {
     });
 
     const data = withDistance.slice(0, limitInt);
-
     return res.json({ status: true, count: data.length, data });
   } catch (err) {
-    console.error('listSchools error:', err);
-    return res.status(500).json({ status: false, message: 'Internal server error' });
+    console.error("listSchools error:", err);
+    return res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
