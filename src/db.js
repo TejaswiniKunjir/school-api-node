@@ -1,10 +1,8 @@
-
 import Database from "better-sqlite3";
 
-const db = new Database("school.db"); // local file
+const db = new Database("school.db");
 db.pragma("journal_mode = WAL");
 
-// Create table if not exists
 db.prepare(`
   CREATE TABLE IF NOT EXISTS schools (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
