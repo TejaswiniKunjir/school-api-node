@@ -15,8 +15,9 @@ app.get('/', (_req, res) => {
   res.json({ status: true, message: 'School API is running' });
 });
 
-app.use('/', schoolsRouter);
+app.use('/schools', schoolsRouter);
 
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ status: false, message: 'Not found' });
 });
