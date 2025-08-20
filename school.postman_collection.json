@@ -1,0 +1,94 @@
+{
+	"info": {
+		"_postman_id": "f08eb368-8f27-43db-910c-48c177667b8c",
+		"name": "school",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39300304",
+		"_collection_link": "https://mytra6.postman.co/workspace/mytra-Workspace~8af7276f-7c6b-4224-8899-d70be59db0bf/collection/39300304-f08eb368-8f27-43db-910c-48c177667b8c?action=share&source=collection_link&creator=39300304"
+	},
+	"item": [
+		{
+			"name": "addSchool",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n \"name\": \"Green Valley High\",\r\n    \"address\": \"123 Main St, Mumbai\",\r\n    \"latitude\": 19.0760,\r\n    \"longitude\": 72.8777\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://school-api-node-cyan.vercel.app/addSchool",
+					"protocol": "https",
+					"host": [
+						"school-api-node-cyan",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"addSchool"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "listSchools",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://school-api-node-cyan.vercel.app/listSchools?lat=19.076&lng=72.878&limit=50",
+					"protocol": "https",
+					"host": [
+						"school-api-node-cyan",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"listSchools"
+					],
+					"query": [
+						{
+							"key": "lat",
+							"value": "19.076"
+						},
+						{
+							"key": "lng",
+							"value": "72.878"
+						},
+						{
+							"key": "limit",
+							"value": "50"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "baseurl",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://school-api-node-cyan.vercel.app/",
+					"protocol": "https",
+					"host": [
+						"school-api-node-cyan",
+						"vercel",
+						"app"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
